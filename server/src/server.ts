@@ -1,17 +1,10 @@
-import express, { request } from 'express';
+import express, { request, response } from 'express';
+import routes from './routes';
 
 const app = express();
 
-const users = [
-    'Diego',
-    'Fernandes'
-];
-
-
-app.get('/users/:id', (request, response) => {
-    const id = request.params.id;
-
-})
+app.use(express.json());
+app.use(routes);
 
 app.listen(3333);
 
