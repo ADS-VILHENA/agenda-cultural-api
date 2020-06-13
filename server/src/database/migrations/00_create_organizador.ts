@@ -6,6 +6,8 @@ export async function up(knex: Knex) {
         table.string('nome').notNullable();
         table.string('telefone').notNullable();
         table.string('endereco').notNullable();
+        table.string('email').notNullable();
+        table.string('senha').notNullable();
     });
 }
 
