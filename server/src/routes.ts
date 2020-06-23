@@ -12,16 +12,30 @@ routes.post('/organizador', async (request, response) => {
             email,
             senha
         } =  request.body;
-    
-        await knex('organizador').insert({
-            nome,
-            telefone,
-            endereco,
-            email,
-            senha
-        });
+        
+        //query que busca email informado no banco de dados
+        async function queryEmail(){
+            return await knex.select('*').from('organizador').where('email', email);
+        };
 
-        return response.json({ success: true });
+        const checkMail = await queryEmail();
+
+        //verifica se a query retornou algum valor
+        if (checkMail.length > 0){
+            return response.json({ success: false });
+        }
+
+        else{
+            await knex('organizador').insert({
+                nome,
+                telefone,
+                endereco,
+                email,
+                senha
+            });
+                    
+            return response.json({ success: true });
+        }
 });
 
 /* routes.get('/categorias', async (request, response) => {
