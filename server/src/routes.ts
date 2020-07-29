@@ -2,6 +2,9 @@ import express, { request, response } from 'express';
 import knex from './database/connection';
 import expressValidator from 'express-validator';
 import bcrypt from 'bcrypt';
+import sqlite3 from 'sqlite3';
+
+
 
 const saltRounds = 10;
 const routes = express.Router();
@@ -16,12 +19,13 @@ routes.post('/organizador', async (request, response) => {
             senha
         } =  request.body;
 
-        //query que busca email informado no banco de dados
-        async function queryEmail(){
-            return await knex.select('*').from('organizador').where('email', email);
-        };
 
-        const checkMail = await queryEmail();
+        //query que busca email informado no banco de dados
+        const checkMail = await knex
+            .select('*')
+            .from('organizador')
+            .where('email', email);
+
 
         //verifica se a query retornou algum valor, para que não seja cadastrado um email duplicado
         if (checkMail.length > 0){
@@ -29,7 +33,8 @@ routes.post('/organizador', async (request, response) => {
         }
 
         else{
-            bcrypt.hash(senha, saltRounds, async function(err, hash){
+            //gravando senha criptografada no banco, usando bcrypt e hash
+            bcrypt.hash(senha, saltRounds, async function (err, hash){
                 const senha = hash;
                 await knex('organizador').insert({
                     nome,
@@ -43,7 +48,6 @@ routes.post('/organizador', async (request, response) => {
         };
 });
 
-
 //rota para login do organizador
 routes.post('/organizador/login', async (request, response) => {
     const {
@@ -51,31 +55,50 @@ routes.post('/organizador/login', async (request, response) => {
         senha
     } = request.body;
 
-    async function queryLogin(){
-        return await knex.select('id').from('organizador').where({
-            'email': email,
-            'senha': senha
+    
+    const user =  await knex('organizador')
+        .select('senha')
+        .where('email', email)
+        .first();   
+    
+    if(user != undefined){
+        bcrypt.compare(senha, user.senha).then(async function(result) {
+            if (result){
+                const id = await knex('organizador').select('id', 'email', 'nome').where('email', email).first();
+                return response.json(id);
+            }
+            else {
+                return response.json({login: "senha ou usuário incorreto"});
+            }
+        });
+    }else {
+        return response.json({login: "senha ou usuário incorreto"})
+    }
+});
+
+
+//rota para cadastro de categoria
+routes.post('/categoria', async (request, response) => {
+    
+    const {
+        nome,
+        descricao,
+        image
+    } = request.body;
+
+    async function gravaCategoria(){
+        await knex('categorias').insert({
+            nome,
+            descricao,
+            image
         });
     }
 
-    const checkLogin = await queryLogin();
-
-    if(checkLogin.length > 0){
-        return response.json({ login: true });
+    if(gravaCategoria()) {
+        
     }
-    else{
-        return response.json({ login: false });
-    }
-
-
 });
 
 
-/* routes.get('/categorias', async (request, response) => {
-    const categorias = await knex('categorias').select('*');
 
-    return response.json({categorias});
-
-});
-*/
 export default routes;
