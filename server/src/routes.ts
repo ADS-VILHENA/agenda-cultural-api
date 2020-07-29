@@ -83,19 +83,33 @@ routes.post('/categoria', async (request, response) => {
     const {
         nome,
         descricao,
-        image
+        imagem
     } = request.body;
 
-    async function gravaCategoria(){
-        await knex('categorias').insert({
-            nome,
-            descricao,
-            image
-        });
+    const categoriaExists = await knex('categorias')
+        .select('id')
+        .where('nome', nome);
+    
+    
+    if (categoriaExists.length > 0){
+        return response.json({exists: "categoria já cadastrada no sistema"});
+    }
+    else {
+        await gravaCategoria();
     }
 
-    if(gravaCategoria()) {
-        
+    async function gravaCategoria(){
+        try {
+            await knex('categorias').insert({
+                nome,
+                descricao,
+                imagem
+            });
+            return response.json(true);
+        } catch (e) {
+            console.log(e);
+            return response.json(false);
+        }
     }
 });
 
