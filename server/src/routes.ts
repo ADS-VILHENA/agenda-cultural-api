@@ -15,6 +15,7 @@ routes.post('/organizador/login', orgController.login);
 //rota para cadastro de categoria
 routes.post('/categoria', ctgController.create);
 
-
+//rota para solicitação de redefenição de senha
+routes.post('/organizador/redefine', orgController.redefine);
 
 export default routes;
