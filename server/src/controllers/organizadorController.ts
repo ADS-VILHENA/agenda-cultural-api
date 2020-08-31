@@ -1,5 +1,5 @@
 import knex from '../database/connection';
-import { Request, Response, text, request } from 'express';
+import e, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
@@ -23,7 +23,7 @@ class OrganizadorController {
             .where('email', email);
         
         if (checkMail.length > 0){
-            return response.json({create: "email já cadastrado"});
+            return response.status(409).send({message: 'Email já cadastrado'});
         }
         else {
             //gravando senha criptografada no banco, usando bcrypt e hash
@@ -37,7 +37,7 @@ class OrganizadorController {
                     senha
                 }); 
             });
-            return response.json({ create: true });
+            return response.status(201).send({message: "Cadastro criado com sucesso!"});
         };
     }
     
@@ -62,14 +62,14 @@ class OrganizadorController {
                         .where('email', email)
                         .first();
                     
-                    return response.json(id);
+                    return response.status(200).json(id);
                 }
                 else {
-                    return response.json({login: "senha ou usuário incorreto"});
+                    return response.status(404).send({message: 'Senha ou usuário incorreto'});
                 }
             });
         }else {
-            return response.json({login: "senha ou usuário incorreto"})
+            return response.status(404).send({message: 'Senha ou usuário incorreto'});
         }
     };
 
@@ -106,19 +106,55 @@ class OrganizadorController {
     
             config.sendMail(mailBody, function(error, info){
                 if (error) {
-                    response.json(console.log(error));
+                    response.status(500).send(error);
                 }
                 else {
-                    response.json(console.log(info));
+                    response.status(200).send({message: 'Email de recuperação enviado com sucesso'});
                 }
             });
         } else {
             
-            return response.json({status: 404})
+            return response.status(404).send({ message: 'Email não cadastrado' });
         }
-
-
     };
+
+    
+    async update(request: Request, response: Response){
+        const { id } = request.params;
+        const {
+            nome,
+            telefone,
+            endereco,
+            email
+        } = request.body;
+
+        const update = await knex('organizador')
+            .where('id', id)
+            .update({
+                nome: nome,
+                telefone: telefone,
+                endereco: endereco,
+                email: email
+            });
+        
+        if(update){
+            return response.status(200).send({ message: 'alterado com sucesso' });
+        } else {
+            return response.status(404).send({ message: 'organizador não encontrado' })
+        }
+    };
+
+
+    async delete(request: Request, response: Response){
+        const { id } = request.params;
+
+        if (await knex('organizador').where('id', id).delete()){
+            return response.status(200).send({ message: 'Conta excluída com sucesso' });
+        } else{
+            return response.status(404).send({ message: 'Cadastro não encontrado' })
+        };
+    };
+
 }
 
 export default OrganizadorController;
