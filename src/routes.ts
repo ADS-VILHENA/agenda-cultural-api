@@ -1,8 +1,8 @@
-import express from 'express';
+import express = require('express');
 import OrgController from './controllers/organizadorController';
 import CtgController from './controllers/categoriaController';
 import EvtController from './controllers/eventoController';
-import { celebrate, Segments, Joi } from 'celebrate';
+import { celebrate, Segments, Joi } from '../node_modules/celebrate';
 
 
 const routes = express.Router();
@@ -50,7 +50,7 @@ routes.delete('/organizador/:id', celebrate({
 routes.post('/categoria', ctgController.create);
 
 //rota para visualização de todas categorias
-routes.get('/categoria', ctgController.view);
+routes.get('/', ctgController.view);
 
 //rota para alterar categoria
 routes.put('/categoria/:id', celebrate({

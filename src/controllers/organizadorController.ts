@@ -1,5 +1,5 @@
 import knex from '../database/connection';
-import e, { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
