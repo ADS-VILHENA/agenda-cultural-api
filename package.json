@@ -8,19 +8,40 @@
     "dev": "ts-node src/server.ts",
     "knex:migrate": "knex --knexfile knexfile.ts migrate:latest",
     "knex:seed": "knex --knexfile knexfile.ts seed:run",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/__tests__/*.+(ts|tsx|js)"
+    ]
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
+    "@types/body-parser": "^1.19.0",
     "@types/cors": "^2.8.7",
     "@types/knex": "^0.16.1",
     "@types/multer": "^1.4.4",
     "@types/nodemailer": "^6.4.0",
     "@types/sqlite3": "^3.1.6",
+    "@types/supertest": "^2.0.10",
     "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
     "celebrate": "^12.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
@@ -31,6 +52,7 @@
     "nodemailer": "^6.4.11",
     "path": "^0.12.7",
     "sqlite3": "^4.2.0",
+    "supertest": "^4.0.2",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.2"
   },

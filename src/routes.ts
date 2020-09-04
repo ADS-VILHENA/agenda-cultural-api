@@ -1,11 +1,11 @@
-import express = require('express');
+import express from 'express';
 import OrgController from './controllers/organizadorController';
 import CtgController from './controllers/categoriaController';
 import EvtController from './controllers/eventoController';
 import { celebrate, Segments, Joi } from '../node_modules/celebrate';
 
 
-const routes = express.Router();
+const routes = express();
 const orgController = new OrgController();
 const ctgController = new CtgController();
 const evtController = new EvtController();
