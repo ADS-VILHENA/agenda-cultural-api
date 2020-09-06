@@ -60,6 +60,20 @@ routes.get('/detalhes/:id', celebrate({
     })
 }), evtController.viewDetails);
 
+//rota para alterar um evento
+routes.put('/evento/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.number().required(),
+    })
+}), evtController.update);
+
+//rota para deletar um evento
+routes.delete('/evento/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.number().required(),
+    })
+}), evtController.delete);
+
 //rota de cadastro de um organizador de eventos da agenda
 routes.post('/organizador', celebrate({
     [Segments.BODY]: Joi.object().keys({
@@ -98,6 +112,7 @@ routes.delete('/organizador/:id', celebrate({
 
 
 
+routes.get('/date', evtController.date)
 
 
 

@@ -1,5 +1,6 @@
 import knex from '../database/connection';
 import { Request, Response } from 'express';
+import {format} from 'date-fns';
 
 class EventoController {
     async create(request: Request, response: Response){
@@ -90,6 +91,55 @@ class EventoController {
         else {
             return response.status(404).send({ message: 'Ops, nada para ver aqui...'})
         }
+    }
+
+    async update(request: Request, response: Response){
+        const { id } = request.params;
+        const {
+            titulo,
+            descricao,
+            endereco,
+            localizacao,
+            telefone,
+            data,
+            logo,
+            id_categoria
+        } = request.body;
+
+        const update = await knex('eventos')
+            .where('id', id)
+            .update({
+                titulo: titulo,
+                descricao: descricao,
+                endereco: endereco,
+                localizacao: localizacao,
+                telefone: telefone,
+                data: data,
+                logo: logo,
+                id_categoria: id_categoria 
+            });
+        
+        if(update){
+            return response.status(200).send({ message: 'Alterado com sucesso!' });
+        } else {
+            return response.status(404).send({ message: 'Evento não encontrado.' })
+        }
+    };
+
+    async delete(request: Request, response: Response){
+        const { id } = request.params;
+
+        if (await knex('eventos').where('id', id).delete()){
+            return response.status(200).send({ message: 'Evento excluído com sucesso!' });
+        } else{
+            return response.status(404).send({ message: 'Evento não encontrado.' })
+        };
+    };
+
+    date(data: Date){
+        
+        const testData = format(data, 'dd/MM/yyyy');
+        return testData;
     }
 }
 
