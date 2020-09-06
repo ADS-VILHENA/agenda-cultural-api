@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(routes);
 
-app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
+app.use('/uploads/', express.static(path.resolve(__dirname, '..', 'uploads/eventos/')));
 
 app.listen(process.env.PORT || 3333);
 

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import OrgController from './controllers/organizadorController';
 import CtgController from './controllers/categoriaController';
 import EvtController from './controllers/eventoController';
@@ -14,8 +14,10 @@ const evtController = new EvtController();
 //rota para visualização de todas categorias
 routes.get('/', ctgController.view);
 
+
 //rota para cadastro de categoria
 routes.post('/categoria', ctgController.create);
+
 
 //rota para alterar categoria
 routes.put('/categoria/:id', celebrate({
@@ -24,12 +26,14 @@ routes.put('/categoria/:id', celebrate({
     })
 }), ctgController.update);
 
+
 //rota para deletar categoria
 routes.delete('/categoria/:id', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
         id: Joi.number().required(),
     })
 }), ctgController.delete);
+
 
 //rota para visualização dos eventos por categoria
 routes.get('/categoria/:id/eventos', celebrate({
@@ -38,20 +42,23 @@ routes.get('/categoria/:id/eventos', celebrate({
     })
 }), evtController.view);
 
+
 //rota para criação de eventos
 routes.post('/evento', celebrate({
     [Segments.BODY]: Joi.object().keys({
         titulo: Joi.string().required(),
         descricao: Joi.string().required(),
         endereco: Joi.string().required(),
-        localizacao: Joi.string(),
+        localizacao: Joi.string().required(),
         telefone: Joi.string().required(),
-        data: Joi.date().required(),
+        data: Joi.string().required(),
+        hora: Joi.required(),
         logo: Joi.string(),
         id_categoria: Joi.number().required(),
         id_organizador: Joi.number().required(),
     })
 }), evtController.create)
+
 
 //rota para visualização dos detalhes do evento
 routes.get('/detalhes/:id', celebrate({
@@ -60,6 +67,7 @@ routes.get('/detalhes/:id', celebrate({
     })
 }), evtController.viewDetails);
 
+
 //rota para alterar um evento
 routes.put('/evento/:id', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
@@ -67,12 +75,22 @@ routes.put('/evento/:id', celebrate({
     })
 }), evtController.update);
 
+
 //rota para deletar um evento
 routes.delete('/evento/:id', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
         id: Joi.number().required(),
     })
 }), evtController.delete);
+
+
+//rota para visualizar eventos relacionados ao organizador
+routes.get('/organizador/:id/eventos', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.number().required(),
+    })
+}), evtController.orgView);
+
 
 //rota de cadastro de um organizador de eventos da agenda
 routes.post('/organizador', celebrate({
@@ -85,6 +103,7 @@ routes.post('/organizador', celebrate({
     })
 }), orgController.create);
 
+
 //rota para login do organizador
 routes.post('/organizador/login', celebrate({
     [Segments.BODY]: Joi.object().keys({
@@ -93,8 +112,10 @@ routes.post('/organizador/login', celebrate({
     })
 }), orgController.login);
 
+
 //rota para solicitação de redefenição de senha
 routes.post('/organizador/redefine', orgController.redefine);
+
 
 //rota para alterar organizador
 routes.put('/organizador/:id', celebrate({
@@ -103,18 +124,13 @@ routes.put('/organizador/:id', celebrate({
     })
 }), orgController.update);
 
+
 //rota para deletar conta de organizador
 routes.delete('/organizador/:id', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
         id: Joi.number().required(),
     })
 }), orgController.delete);
-
-
-
-routes.get('/date', evtController.date)
-
-
 
 
 

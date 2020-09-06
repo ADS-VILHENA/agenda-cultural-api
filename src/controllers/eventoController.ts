@@ -1,6 +1,6 @@
 import knex from '../database/connection';
 import { Request, Response } from 'express';
-import {format} from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 class EventoController {
     async create(request: Request, response: Response){
@@ -11,21 +11,39 @@ class EventoController {
             localizacao,
             telefone,
             data,
+            hora,
             logo,
             id_categoria,
             id_organizador
         } = request.body;
 
+        //querys para validação no banco de dados
         const checkEvento = await knex('eventos')
             .select('id')
             .where({
                 'titulo': titulo,
                 'descricao': descricao
-        })
+            });        
 
+        const checkOrganizador = await knex('organizador')
+            .select('id')
+            .where('id', id_organizador);
+
+        const checkCategoria = await knex('categorias')
+            .select('id')
+            .where('id', id_categoria);
+
+
+        
+        //condições para se criar um evento
         if (checkEvento.length > 0) {
-            return response.status(409).send({message: 'evento já está cadastrado'});
-        } 
+            return response.status(409).send({message: 'Evento já está cadastrado'});
+        } else if (checkOrganizador.length == 0) {
+            return response.status(404).send({message: 'Organizador não encontrado'});
+
+        } else if (checkCategoria.length == 0) {
+            return response.status(404).send({message: 'Categoria não encontrada'});
+        }
         else {
             await gravaEvento();
         }
@@ -39,6 +57,7 @@ class EventoController {
                     localizacao,
                     telefone,
                     data,
+                    hora,
                     logo,
                     id_categoria,
                     id_organizador
@@ -50,11 +69,14 @@ class EventoController {
         };
     }
 
+
+
+
     async view(request: Request, response: Response) {
         const { id } = request.params;
         
         const eventos = await knex('eventos')
-            .select('titulo', 'descricao')
+            .select('titulo', 'descricao', 'id')
             .where('id_categoria', id);
 
         if (eventos) {
@@ -64,23 +86,29 @@ class EventoController {
         }
     }
 
+
+
+
     async viewDetails(request: Request, response: Response) {
         const { id } = request.params;
 
-        const detalhes = await knex('eventos')
-            .select('nome', '*')
+        const detalhes = await knex.select('nome', 'eventos.endereco as evtEndereco', 'eventos.telefone as evtTelefone','*')
+            .from('eventos')
             .innerJoin('organizador', 'organizador.id', 'eventos.id_organizador')
             .where('eventos.id', id);
 
         const serializedEvento = detalhes.map(detalhes => {
+            //função do pacote date-fns para conversão de string para o tipo Date
+            const date = parseISO(detalhes.data);
             return {
                 titulo: detalhes.titulo,
                 logo: `http://localhost:3333/uploads/${detalhes.logo}`,
                 descricao: detalhes.descricao,
-                endereco: detalhes.endereco,
+                endereco: detalhes.evtEndereco,
                 localizacao: detalhes.localizacao,
-                telefone: detalhes.telefone,
-                data: detalhes.data,
+                telefone: detalhes.evtTelefone,
+                data: format(date, 'dd/MM/yyyy'),
+                hora: detalhes.hora,
                 organizador: detalhes.nome,
             };
         });
@@ -93,6 +121,35 @@ class EventoController {
         }
     }
 
+
+
+    async orgView(request: Request, response: Response){
+        const { id } = request.params;
+
+        const eventos = await knex('eventos')
+            .select('titulo', 'descricao', 'logo', 'id')
+            .where('id_organizador', id);
+    
+        
+        const serializedEvento = eventos.map(eventos => {
+            return { 
+                titulo: eventos.titulo,
+                logo: `http://localhost:3333/uploads/${eventos.logo}`,
+                descricao: eventos.descricao,
+                id: eventos.id
+            }
+        }); 
+
+        if(serializedEvento.length > 0){
+            response.status(200).send(serializedEvento);
+        } 
+        else {
+            return response.status(404).send({ message: 'Ops, nada para ver aqui...'})
+        }
+    };
+
+
+
     async update(request: Request, response: Response){
         const { id } = request.params;
         const {
@@ -102,6 +159,7 @@ class EventoController {
             localizacao,
             telefone,
             data,
+            hora,
             logo,
             id_categoria
         } = request.body;
@@ -115,6 +173,7 @@ class EventoController {
                 localizacao: localizacao,
                 telefone: telefone,
                 data: data,
+                hora: hora,
                 logo: logo,
                 id_categoria: id_categoria 
             });
@@ -126,6 +185,9 @@ class EventoController {
         }
     };
 
+
+
+
     async delete(request: Request, response: Response){
         const { id } = request.params;
 
@@ -135,12 +197,6 @@ class EventoController {
             return response.status(404).send({ message: 'Evento não encontrado.' })
         };
     };
-
-    date(data: Date){
-        
-        const testData = format(data, 'dd/MM/yyyy');
-        return testData;
-    }
 }
 
 export default EventoController;
