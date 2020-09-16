@@ -12,10 +12,13 @@ class EventoController {
             telefone,
             data,
             hora,
-            logo,
             id_categoria,
             id_organizador
         } = request.body;
+
+        const logo = request.file.filename;
+
+        console.log(logo);
 
         //querys para validação no banco de dados
         const checkEvento = await knex('eventos')
@@ -184,6 +187,7 @@ class EventoController {
             return response.status(404).send({ message: 'Evento não encontrado.' })
         }
     };
+
 
 
 

@@ -3,6 +3,7 @@ import OrgController from './controllers/organizadorController';
 import CtgController from './controllers/categoriaController';
 import EvtController from './controllers/eventoController';
 import { celebrate, Segments, Joi } from 'celebrate';
+import uploads from './controllers/imageController';
 
 
 const routes = express();
@@ -44,7 +45,7 @@ routes.get('/categoria/:id/eventos', celebrate({
 
 
 //rota para criação de eventos
-routes.post('/evento', celebrate({
+routes.post('/evento', uploads.single('logo'), celebrate({
     [Segments.BODY]: Joi.object().keys({
         titulo: Joi.string().required(),
         descricao: Joi.string().required(),
@@ -52,10 +53,9 @@ routes.post('/evento', celebrate({
         localizacao: Joi.string().required(),
         telefone: Joi.string().required(),
         data: Joi.string().required(),
-        hora: Joi.required(),
-        logo: Joi.string(),
-        id_categoria: Joi.number().required(),
-        id_organizador: Joi.number().required(),
+        hora: Joi.string().required(),
+        id_categoria: Joi.required(),
+        id_organizador: Joi.required(),
     })
 }), evtController.create)
 
