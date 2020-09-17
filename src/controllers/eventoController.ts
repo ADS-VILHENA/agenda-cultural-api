@@ -18,7 +18,6 @@ class EventoController {
 
         const logo = request.file.filename;
 
-        console.log(logo);
 
         //querys para validação no banco de dados
         const checkEvento = await knex('eventos')
@@ -105,7 +104,7 @@ class EventoController {
             const date = parseISO(detalhes.data);
             return {
                 titulo: detalhes.titulo,
-                logo: `http://localhost:3333/uploads/${detalhes.logo}`,
+                logo: `${process.env.URL}/${detalhes.logo}`,
                 descricao: detalhes.descricao,
                 endereco: detalhes.evtEndereco,
                 localizacao: detalhes.localizacao,
@@ -137,7 +136,7 @@ class EventoController {
         const serializedEvento = eventos.map(eventos => {
             return { 
                 titulo: eventos.titulo,
-                logo: `http://localhost:3333/uploads/${eventos.logo}`,
+                logo: `${process.env.URL}/${eventos.logo}`,
                 descricao: eventos.descricao,
                 id: eventos.id
             }
