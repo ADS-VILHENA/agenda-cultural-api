@@ -9,7 +9,9 @@ export async function up(knex: Knex) {
         table.string('localizacao').notNullable();
         table.string('telefone').notNullable();
         table.date('data').notNullable();
-        table.string('logo').notNullable();
+        table.string('hora').notNullable();
+        table.string('logo');
+        table.string('status').defaultTo('A');
         
         table.integer('id_categoria')
             .notNullable()
