@@ -6,10 +6,11 @@ class CategoriaController {
     async create(request: Request, response: Response) {
         const {
             nome,
-            descricao,
-            imagem
+            descricao
         } = request.body;
-    
+
+        const imagem = request.file.filename;
+
         const categoriaExists = await knex('categorias')
             .select('id')
             .where('nome', nome);
@@ -39,12 +40,12 @@ class CategoriaController {
 
     async view(request: Request, response: Response) {
         const categorias = await knex('categorias').select('*');
-
+        
         const serializedCategoria = categorias.map(categoria => {
             return {
                 id: categoria.id,
                 nome: categoria.nome,
-                image_url: `http://localhost:3333/uploads/${categoria.imagem}`,
+                image_url: `${process.env.URL}/${categoria.imagem}`,
                 descricao: categoria.descricao
             };
         });

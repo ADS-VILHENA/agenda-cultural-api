@@ -17,7 +17,7 @@ routes.get('/', ctgController.view);
 
 
 //rota para cadastro de categoria
-routes.post('/categoria', ctgController.create);
+routes.post('/categoria', uploads.single('imagem'), ctgController.create);
 
 
 //rota para alterar categoria
