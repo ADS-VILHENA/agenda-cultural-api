@@ -4,72 +4,77 @@ import { format, parseISO } from 'date-fns';
 
 class EventoController {
     async create(request: Request, response: Response){
-        const { 
-            titulo,
-            descricao,
-            endereco,
-            localizacao,
-            telefone,
-            data,
-            hora,
-            id_categoria,
-            id_organizador
-        } = request.body;
-
-        const logo = request.file.filename;
-
-
-        //querys para validação no banco de dados
-        const checkEvento = await knex('eventos')
-            .select('id')
-            .where({
-                'titulo': titulo,
-                'descricao': descricao
-            });        
-
-        const checkOrganizador = await knex('organizador')
-            .select('id')
-            .where('id', id_organizador);
-
-        const checkCategoria = await knex('categorias')
-            .select('id')
-            .where('id', id_categoria);
-
-
-        
-        //condições para se criar um evento
-        if (checkEvento.length > 0) {
-            return response.status(409).send({message: 'Evento já está cadastrado'});
-        } else if (checkOrganizador.length == 0) {
-            return response.status(404).send({message: 'Organizador não encontrado'});
-
-        } else if (checkCategoria.length == 0) {
-            return response.status(404).send({message: 'Categoria não encontrada'});
-        }
-        else {
-            await gravaEvento();
-        }
-
-        async function gravaEvento(){
-            try {
-                await knex('eventos').insert({
-                    titulo,
-                    descricao,
-                    endereco,
-                    localizacao,
-                    telefone,
-                    data,
-                    hora,
-                    logo,
-                    id_categoria,
-                    id_organizador
-                });
-                return response.status(200).send({message: 'Evento cadastrado com sucesso!'})
-            } catch (error) {
-                return response.status(500).send({message: 'Ocorreu um erro ao cadastrar o evento, tente novamente.', erro: error})
+        if (request.session){
+            if(!request.session.user){
+                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
             }
-        };
-    }
+            //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
+            const org = request.session.idOrg
+        
+            const { 
+                titulo,
+                descricao,
+                endereco,
+                localizacao,
+                telefone,
+                data,
+                hora,
+                id_categoria
+            } = request.body;
+
+            const logo = request.file.filename;
+
+
+            //querys para validação no banco de dados
+            const checkEvento = await knex('eventos')
+                .select('id')
+                .where({
+                    'titulo': titulo,
+                    'descricao': descricao
+                });        
+
+            const checkOrganizador = await knex('organizador')
+                .select('id')
+                .where('id', org);
+
+            const checkCategoria = await knex('categorias')
+                .select('id')
+                .where('id', id_categoria);
+
+
+            
+            //condições para se criar um evento
+            if (checkEvento.length > 0) {
+                return response.status(409).send({message: 'Evento já está cadastrado'});
+
+            } else if (checkOrganizador.length == 0) {
+                return response.status(404).send({message: 'Organizador não encontrado'});
+
+            } else if (checkCategoria.length == 0) {
+                return response.status(404).send({message: 'Categoria não encontrada'});
+                
+            }
+            else {
+                try {
+                    await knex('eventos').insert({
+                        titulo,
+                        descricao,
+                        endereco,
+                        localizacao,
+                        telefone,
+                        data,
+                        hora,
+                        logo,
+                        id_categoria,
+                        org
+                    });
+                    return response.status(200).send({message: 'Evento cadastrado com sucesso!'})
+                } catch (error) {
+                    return response.status(500).send({message: 'Ocorreu um erro ao cadastrar o evento, tente novamente.', erro: error})
+                }
+            }
+        }
+    };
 
 
 
@@ -81,8 +86,10 @@ class EventoController {
             .select('titulo', 'descricao', 'id')
             .where('id_categoria', id);
 
-        if (eventos) {
+        if (eventos.length > 0) {
             return response.status(200).send(eventos);
+        } else if(eventos.length == 0){
+            return response.status(404).send({message: "Nenhum evento cadastrado para essa categoria!"});
         } else {
             return response.status(500).send({message: 'Ocorreu um erro ao buscar pelos eventos relacionados a essa categoria'});
         }
@@ -126,6 +133,12 @@ class EventoController {
 
 
     async orgView(request: Request, response: Response){
+        if (request.session){
+            if(!request.session.user){
+                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+            }
+        }
+
         const { id } = request.params;
 
         const eventos = await knex('eventos')
@@ -153,53 +166,75 @@ class EventoController {
 
 
     async update(request: Request, response: Response){
-        const { id } = request.params;
-        const {
-            titulo,
-            descricao,
-            endereco,
-            localizacao,
-            telefone,
-            data,
-            hora,
-            logo,
-            id_categoria
-        } = request.body;
+        if (request.session){
+            if(!request.session.user){
+                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+            }
+            //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
+            const org = request.session.idOrg
 
-        const update = await knex('eventos')
-            .where('id', id)
-            .update({
-                titulo: titulo,
-                descricao: descricao,
-                endereco: endereco,
-                localizacao: localizacao,
-                telefone: telefone,
-                data: data,
-                hora: hora,
-                logo: logo,
-                id_categoria: id_categoria 
-            });
+            const { id } = request.params;
+            const {
+                titulo,
+                descricao,
+                endereco,
+                localizacao,
+                telefone,
+                data,
+                hora,
+                logo,
+                id_categoria
+            } = request.body;
+    
+            const update = await knex('eventos')
+                .where({
+                    'id': id,
+                    'id_organizador': org
+                })
+                .update({
+                    titulo: titulo,
+                    descricao: descricao,
+                    endereco: endereco,
+                    localizacao: localizacao,
+                    telefone: telefone,
+                    data: data,
+                    hora: hora,
+                    logo: logo,
+                    id_categoria: id_categoria 
+                });
+            
+            if(update){
+                return response.status(200).send({ message: 'Alterado com sucesso!' });
+            } else {
+                return response.status(404).send({ message: 'Evento não encontrado.' })
+            }
+        };
+    }
         
-        if(update){
-            return response.status(200).send({ message: 'Alterado com sucesso!' });
-        } else {
-            return response.status(404).send({ message: 'Evento não encontrado.' })
-        }
-    };
+        
 
 
 
 
 
     async delete(request: Request, response: Response){
-        const { id } = request.params;
-
-        if (await knex('eventos').where('id', id).delete()){
-            return response.status(200).send({ message: 'Evento excluído com sucesso!' });
-        } else{
-            return response.status(404).send({ message: 'Evento não encontrado.' })
+        if (request.session){
+            if(!request.session.user){
+                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+            }
+            //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
+            const org = request.session.idOrg
+        
+            const { id } = request.params;
+    
+            if (await knex('eventos').where({'id': id,'id_organizador': org}).delete()){
+                return response.status(200).send({ message: 'Evento excluído com sucesso!'});
+            } else{
+                return response.status(404).send({ message: 'Evento não encontrado.' })
+            };
         };
-    };
+    }
+
 }
 
 export default EventoController;

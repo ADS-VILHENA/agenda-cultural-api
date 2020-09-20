@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: __dirname + 'src/.env'});
 
+
 const saltRounds = 10;
 
 class OrganizadorController {    
@@ -16,7 +17,7 @@ class OrganizadorController {
             email,
             senha
         } = request.body;
-    
+
         const checkMail = await knex
             .select('*')
             .from('organizador')
@@ -49,25 +50,33 @@ class OrganizadorController {
     
         //verifica pelo email informado, no banco de dados
         const user =  await knex('organizador')
-            .select('senha')
+            .select('senha', 'id')
             .where('email', email)
             .first();   
         
         //se o retorno de usuário não for nulo é comparada a senha, usando a biblioteca bcrypt
         if(user != undefined){
-            bcrypt.compare(senha, user.senha).then(async function(result) {
-                if (result){
-                    const id = await knex('organizador')
-                        .select('id', 'email', 'nome')
-                        .where('email', email)
-                        .first();
-                    
-                    return response.status(200).json(id);
-                }
-                else {
-                    return response.status(404).send({message: 'Senha ou usuário incorreto'});
-                }
-            });
+            try{
+                bcrypt.compare(senha, user.senha).then(async function(result) {
+                    if (result){
+                        const id = await knex('organizador')
+                            .select('id', 'email', 'nome')
+                            .where('email', email)
+                            .first();
+                        
+                        if (request.session){
+                            request.session.user = user;
+                            request.session.idOrg = user.id;
+                            return response.status(200).json(id);
+                        }
+                    }
+                    else {
+                        return response.status(404).send({message: 'Senha ou usuário incorreto'});
+                    }
+                });
+            } catch(e) {
+                response.status(500).send({message: "Ocorreu um erro " + e});
+            }
         }else {
             return response.status(404).send({message: 'Senha ou usuário incorreto'});
         }
@@ -75,7 +84,6 @@ class OrganizadorController {
 
 
     async redefine (request: Request, response: Response) {
-        
         const {
             email
         } = request.body;
@@ -120,6 +128,13 @@ class OrganizadorController {
 
     
     async update(request: Request, response: Response){
+        //verifica se o usuário está autenticado na sessão
+        if(request.session){
+            if(!request.session.user){
+                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+            }
+        }
+        
         const { id } = request.params;
         const {
             nome,
@@ -146,6 +161,11 @@ class OrganizadorController {
 
 
     async delete(request: Request, response: Response){
+        if(request.session){
+            if(!request.session.user){
+                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+            }
+        }
         const { id } = request.params;
 
         if (await knex('organizador').where('id', id).delete()){

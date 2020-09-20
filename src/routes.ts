@@ -54,8 +54,7 @@ routes.post('/evento', uploads.single('logo'), celebrate({
         telefone: Joi.string().required(),
         data: Joi.string().required(),
         hora: Joi.string().required(),
-        id_categoria: Joi.required(),
-        id_organizador: Joi.required(),
+        id_categoria: Joi.required()
     })
 }), evtController.create)
 
