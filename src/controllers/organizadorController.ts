@@ -66,7 +66,6 @@ class OrganizadorController {
                         
                         if (request.session){
                             request.session.user = user;
-                            request.session.idOrg = user.id;
                             return response.status(200).json(id);
                         }
                     }

@@ -9,7 +9,7 @@ class EventoController {
                 return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const org = request.session.idOrg
+            const org = request.session.user.id
         
             const { 
                 titulo,
@@ -171,7 +171,7 @@ class EventoController {
                 return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const org = request.session.idOrg
+            const org = request.session.user.id
 
             const { id } = request.params;
             const {
@@ -223,7 +223,7 @@ class EventoController {
                 return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const org = request.session.idOrg
+            const org = request.session.user.id
         
             const { id } = request.params;
     
