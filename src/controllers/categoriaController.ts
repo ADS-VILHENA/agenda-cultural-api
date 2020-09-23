@@ -6,7 +6,7 @@ class CategoriaController {
     async create(request: Request, response: Response) {
         if(request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
         }
         const {
@@ -37,7 +37,6 @@ class CategoriaController {
                 });
                 return response.status(200).send({message: 'Categoria cadastrada com sucesso!'});
             } catch (error) {
-                console.log(error);
                 return response.status(500).send({message: 'Ocorreu um erro ao cadastrar a categoria, tente novamente.', erro: error});
             }
         }
@@ -66,7 +65,7 @@ class CategoriaController {
     async update(request: Request, response: Response) {
         if(request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
         }
         const { id } = request.params;
@@ -94,7 +93,7 @@ class CategoriaController {
     async delete(request: Request, response: Response) {
         if(request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
         }
         const { id } = request.params;

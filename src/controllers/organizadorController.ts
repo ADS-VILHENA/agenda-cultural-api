@@ -10,6 +10,12 @@ const saltRounds = 10;
 
 class OrganizadorController {    
     async create (request: Request, response: Response) {
+        if(request.session){
+            if(request.session.user){
+                return response.status(409).send({message: "Usuário já está logado!"})
+            }
+        }
+
         const {
             nome,
             telefone,
@@ -43,6 +49,12 @@ class OrganizadorController {
     }
     
     async login (request: Request, response: Response) {
+        if(request.session){
+            if(request.session.user){
+                return response.status(409).send({message: "Usuário já está logado!"})
+            }
+        }
+        
         const {
             email,
             senha
@@ -130,50 +142,51 @@ class OrganizadorController {
         //verifica se o usuário está autenticado na sessão
         if(request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
-        }
+            const id = request.session.user.id;
+            
+            const {
+                nome,
+                telefone,
+                endereco,
+                email
+            } = request.body;
+    
+            const update = await knex('organizador')
+                .where('id', id)
+                .update({
+                    nome: nome,
+                    telefone: telefone,
+                    endereco: endereco,
+                    email: email
+                });
+            
+            if(update){
+                return response.status(200).send({ message: 'alterado com sucesso' });
+            } else {
+                return response.status(404).send({ message: 'organizador não encontrado' })
+            }
+        };
+    }
         
-        const { id } = request.params;
-        const {
-            nome,
-            telefone,
-            endereco,
-            email
-        } = request.body;
-
-        const update = await knex('organizador')
-            .where('id', id)
-            .update({
-                nome: nome,
-                telefone: telefone,
-                endereco: endereco,
-                email: email
-            });
-        
-        if(update){
-            return response.status(200).send({ message: 'alterado com sucesso' });
-        } else {
-            return response.status(404).send({ message: 'organizador não encontrado' })
-        }
-    };
 
 
     async delete(request: Request, response: Response){
         if(request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
+
+            const id = request.session.user.id;
+    
+            if (await knex('organizador').where('id', id).delete()){
+                return response.status(200).send({ message: 'Conta excluída com sucesso' });
+            } else{
+                return response.status(404).send({ message: 'Cadastro não encontrado' })
+            };
         }
-        const { id } = request.params;
-
-        if (await knex('organizador').where('id', id).delete()){
-            return response.status(200).send({ message: 'Conta excluída com sucesso' });
-        } else{
-            return response.status(404).send({ message: 'Cadastro não encontrado' })
-        };
     };
-
 }
 
 export default OrganizadorController;

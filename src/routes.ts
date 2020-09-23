@@ -84,11 +84,7 @@ routes.delete('/evento/:id', celebrate({
 
 
 //rota para visualizar eventos relacionados ao organizador
-routes.get('/organizador/:id/eventos', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.number().required(),
-    })
-}), evtController.orgView);
+routes.get('/organizador/eventos', evtController.orgView);
 
 
 //rota de cadastro de um organizador de eventos da agenda
@@ -117,19 +113,11 @@ routes.post('/organizador/redefine', orgController.redefine);
 
 
 //rota para alterar organizador
-routes.put('/organizador/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.number().required(),
-    })
-}), orgController.update);
+routes.put('/organizador', orgController.update);
 
 
 //rota para deletar conta de organizador
-routes.delete('/organizador/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.number().required(),
-    })
-}), orgController.delete);
+routes.delete('/organizador', orgController.delete);
 
 
 

@@ -6,7 +6,7 @@ class EventoController {
     async create(request: Request, response: Response){
         if (request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
             const org = request.session.user.id
@@ -135,7 +135,7 @@ class EventoController {
     async orgView(request: Request, response: Response){
         if (request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
         }
 
@@ -168,7 +168,7 @@ class EventoController {
     async update(request: Request, response: Response){
         if (request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
             const org = request.session.user.id
@@ -220,7 +220,7 @@ class EventoController {
     async delete(request: Request, response: Response){
         if (request.session){
             if(!request.session.user){
-                return response.status(403).send({message: "Usuário não autenticado. Faça o login!"});
+                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
             const org = request.session.user.id
