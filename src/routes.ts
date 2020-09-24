@@ -107,6 +107,8 @@ routes.post('/organizador/login', celebrate({
     })
 }), orgController.login);
 
+routes.get('/organizador/logout', orgController.logout);
+
 
 //rota para solicitação de redefenição de senha
 routes.post('/organizador/redefine', orgController.redefine);

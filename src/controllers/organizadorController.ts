@@ -187,6 +187,24 @@ class OrganizadorController {
             };
         }
     };
+
+
+
+    async logout(request: Request, response: Response){
+        if(request.session){
+            if(!request.session.user){
+                return response.status(401).send({message: "Usuário não logado!"});
+            }
+
+            request.session.destroy(function(err){
+                if(err){
+                    response.send(err);
+                } else{
+                    response.redirect('/');
+                }
+            });
+        }
+    }
 }
 
 export default OrganizadorController;
