@@ -137,29 +137,29 @@ class EventoController {
             if(!request.session.user){
                 return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
-        }
-
-        const { id } = request.params;
-
-        const eventos = await knex('eventos')
-            .select('titulo', 'descricao', 'logo', 'id')
-            .where('id_organizador', id);
     
-        
-        const serializedEvento = eventos.map(eventos => {
-            return { 
-                titulo: eventos.titulo,
-                logo: `${process.env.URL}/${eventos.logo}`,
-                descricao: eventos.descricao,
-                id: eventos.id
-            }
-        }); 
+            const id = request.session.user.id;
 
-        if(serializedEvento.length > 0){
-            response.status(200).send(serializedEvento);
-        } 
-        else {
-            return response.status(404).send({ message: 'Ops, nada para ver aqui...'})
+            const eventos = await knex('eventos')
+                .select('titulo', 'descricao', 'logo', 'id')
+                .where('id_organizador', id);
+        
+            
+            const serializedEvento = eventos.map(eventos => {
+                return { 
+                    titulo: eventos.titulo,
+                    logo: `${process.env.URL}/${eventos.logo}`,
+                    descricao: eventos.descricao,
+                    id: eventos.id
+                }
+            }); 
+    
+            if(serializedEvento.length > 0){
+                response.status(200).send(serializedEvento);
+            } 
+            else {
+                return response.status(404).send({ message: 'Ops, nada para ver aqui...'})
+            }
         }
     };
 
