@@ -8,7 +8,7 @@
     "dev": "ts-node-dev src/server.ts",
     "knexmigrate": "knex --knexfile knexfile.ts migrate:latest",
     "knex:seed": "knex --knexfile knexfile.ts seed:run",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --forceExit"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -21,12 +21,13 @@
     },
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
+        "tsConfig": "tsconfig.json"
       }
     },
     "testMatch": [
       "**/__tests__/*.+(ts|tsx|js)"
-    ]
+    ],
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +37,7 @@
     "@types/body-parser": "^1.19.0",
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.7",
+    "@types/cron": "^1.7.2",
     "@types/date-fns": "^2.6.0",
     "@types/express-session": "^1.17.0",
     "@types/jsonwebtoken": "^8.5.0",
@@ -53,6 +55,7 @@
     "connect-session-knex": "^2.0.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+    "cron": "^1.8.2",
     "date-fns": "^2.16.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
@@ -60,6 +63,7 @@
     "express-validator": "^6.6.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.5",
+    "mock-session": "0.0.5",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.11",
     "path": "^0.12.7",

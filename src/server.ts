@@ -3,12 +3,15 @@ import path from 'path';
 import routes from './routes';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import cron from '../jobs/checkEvento';
 import session from 'express-session';
 const KnexSessionStore = require('connect-session-knex')(session);
 
 //É utilizada a instância do knex para que seja salvas as sessions dos usuários
 const store = new KnexSessionStore();
 const app = express();
+
+cron.start();
 
 app.use(cors());
 app.use(bodyParser.json());

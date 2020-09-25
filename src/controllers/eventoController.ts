@@ -9,7 +9,7 @@ class EventoController {
                 return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
             }
             //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const org = request.session.user.id
+            const id_organizador = request.session.user.id
         
             const { 
                 titulo,
@@ -35,7 +35,7 @@ class EventoController {
 
             const checkOrganizador = await knex('organizador')
                 .select('id')
-                .where('id', org);
+                .where('id', id_organizador);
 
             const checkCategoria = await knex('categorias')
                 .select('id')
@@ -66,7 +66,7 @@ class EventoController {
                         hora,
                         logo,
                         id_categoria,
-                        org
+                        id_organizador
                     });
                     return response.status(200).send({message: 'Evento cadastrado com sucesso!'})
                 } catch (error) {
@@ -83,8 +83,9 @@ class EventoController {
         const { id } = request.params;
         
         const eventos = await knex('eventos')
-            .select('titulo', 'descricao', 'id')
-            .where('id_categoria', id);
+            .select('titulo', 'descricao', 'id', 'status')
+            .where('id_categoria', id)
+            .orderBy('data');
 
         if (eventos.length > 0) {
             return response.status(200).send(eventos);
@@ -119,6 +120,7 @@ class EventoController {
                 data: format(date, 'dd/MM/yyyy'),
                 hora: detalhes.hora,
                 organizador: detalhes.nome,
+                status: detalhes.status
             };
         });
     
@@ -141,8 +143,9 @@ class EventoController {
             const id = request.session.user.id;
 
             const eventos = await knex('eventos')
-                .select('titulo', 'descricao', 'logo', 'id')
-                .where('id_organizador', id);
+                .select('titulo', 'descricao', 'logo', 'id', 'data')
+                .where('id_organizador', id)
+                .orderBy('data');
         
             
             const serializedEvento = eventos.map(eventos => {
