@@ -1,30 +1,30 @@
 import request from 'supertest';
 import app from '../src/server';
 
+// beforeEach(() => {
+//     return login();
+// });
 
-describe("TDD deletar organizador", () => {
-    it("Erro ao deletar uma conta de organizador inexistente", async () => {
-        const res = await request(app)
-            .delete('/organizador/8')
-        expect(res.status).toEqual(404)
-    })
-})    
+describe('Login', () =>{
+    it('deve logar na api', async (done) => {
+       const response = await request(app).post('/organizador/login')
+       .send({
+           email: 'email@org.com',
+           senha: 'senha123'
+       });
+       expect(response.status).toEqual(200)
+       done();
+    });
 
-describe("TDD create admin", () => {
-    it("Should create a new administrator", async () => {  
-        const data = {
-                nome: 'Organizador',
-                telefone: '69984595945',
-                endereco: 'rua das flores, jardim são joão',
-                email: 'email@org.com',
-                senha: 'senha123'
-            };
-    
-        const res = await request(app)
-            .post('/organizador')
-            .send(data)
-        expect(res.status).toEqual(201)
-    })
-})
+});
 
-    
+describe('Funçoes de organizador', () => {
+    it('deve alterar usuário', async (done) => {
+        const response = await request(app).put('/organizador')
+        .send({
+            nome: 'Teste alteração'
+        });
+        expect(response.status).toEqual(200)
+        done();
+    });
+});

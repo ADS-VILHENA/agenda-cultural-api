@@ -3,7 +3,7 @@ Nessa função é utilizado o pacote npm Cron
 
 Com ele é possível programar um tempo de execução para uma função ser executada;
 
-nesse caso é utilizado para verificar se um evento já ocorreu e quanto tempo passou.
+nesse caso é utilizado para verificar se um evento já ocorreu ou se ele ocorre hoje.
 
 @MatheusAnciloto
 */
