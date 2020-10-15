@@ -141,9 +141,9 @@ class EventoController {
             }
     
             const id = request.session.user.id;
-
-            const eventos = await knex('eventos')
-                .select('titulo', 'descricao', 'logo', 'id', 'data')
+            
+            const eventos = await knex('eventos').join('organizador', 'eventos.id_organizador', '=', 'organizador.id')
+                .select('titulo', 'descricao', 'logo', 'eventos.id', 'data', 'nome')
                 .where('id_organizador', id)
                 .orderBy('data');
         
@@ -153,7 +153,8 @@ class EventoController {
                     titulo: eventos.titulo,
                     logo: `${process.env.URL}/${eventos.logo}`,
                     descricao: eventos.descricao,
-                    id: eventos.id
+                    id: eventos.id,
+                    organizador: eventos.nome
                 }
             }); 
     
