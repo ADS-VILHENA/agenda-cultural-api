@@ -5,6 +5,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import cron from '../jobs/checkEvento';
 import session from 'express-session';
+import cookie from 'cookie-parser';
 const KnexSessionStore = require('connect-session-knex')(session);
 
 //É utilizada a instância do knex para que seja salvas as sessions dos usuários
@@ -25,6 +26,7 @@ app.use(session({
     },
     store
 }));
+app.use(cookie());
 app.use(routes);
 app.use('/uploads/', express.static(path.resolve(__dirname, '..', 'uploads/')));
 app.listen(process.env.PORT || 3333);
