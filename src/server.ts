@@ -23,6 +23,7 @@ app.use(session({
     saveUninitialized:false,
     cookie: {
         maxAge: 60*60*24*7, // armazena sessão para 7 dias de duração
+        httpOnly: false
     },
     store
 }));
