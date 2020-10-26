@@ -14,9 +14,8 @@ const app = express();
 
 cron.start();
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+
+app.use(cookie());
 app.use(session({
     secret: `${process.env.SECRET}`,
     resave:false, 
@@ -27,7 +26,16 @@ app.use(session({
     },
     store
 }));
-app.use(cookie());
+app.use(cors({
+    origin: [
+        'http://localhost:3000',
+        'https://localhost:3000'
+    ],
+    credentials: true,
+    exposedHeaders: ['set-cookie']
+}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(routes);
 app.use('/uploads/', express.static(path.resolve(__dirname, '..', 'uploads/')));
 app.listen(process.env.PORT || 3333);
