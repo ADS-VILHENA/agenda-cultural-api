@@ -9,13 +9,13 @@ const app = express();
 
 
 cron.start();
-//função para permitir qualquer URL ter acesso a api
-app.use(function(req, res, next){
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Origin", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-app.use(cors());
+//variável para permitir qualquer URL ter acesso a api
+var corsOptions = {
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(routes);
