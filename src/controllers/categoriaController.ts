@@ -4,11 +4,7 @@ import { Request, Response } from 'express';
 
 class CategoriaController {
     async create(request: Request, response: Response) {
-        if(request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-        }
+        
         const {
             nome,
             descricao
@@ -63,11 +59,7 @@ class CategoriaController {
     };
 
     async update(request: Request, response: Response) {
-        if(request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-        }
+        
         const { id } = request.params;
         const {
             nome,
@@ -91,11 +83,7 @@ class CategoriaController {
     };
 
     async delete(request: Request, response: Response) {
-        if(request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-        }
+        
         const { id } = request.params;
 
         if (await knex('categorias').where('id', id).delete()){

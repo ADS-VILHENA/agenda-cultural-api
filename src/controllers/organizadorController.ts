@@ -1,20 +1,15 @@
 import knex from '../database/connection';
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: __dirname + 'src/.env'});
-
 
 const saltRounds = 10;
 
 class OrganizadorController {    
     async create (request: Request, response: Response) {
-        if(request.session){
-            if(request.session.user){
-                return response.status(409).send({message: "Usuário já está logado!"})
-            }
-        }
 
         const {
             nome,
@@ -49,11 +44,6 @@ class OrganizadorController {
     }
     
     async login (request: Request, response: Response) {
-        if(request.session){
-            if(request.session.user){
-                return response.status(409).send({message: "Usuário já está logado!"})
-            }
-        }
         
         const {
             email,
@@ -62,7 +52,7 @@ class OrganizadorController {
     
         //verifica pelo email informado, no banco de dados
         const user =  await knex('organizador')
-            .select('senha', 'id')
+            .select('email', 'nome', 'senha', 'id')
             .where('email', email)
             .first();   
         
@@ -71,15 +61,19 @@ class OrganizadorController {
             try{
                 bcrypt.compare(senha, user.senha).then(async function(result) {
                     if (result){
-                        const id = await knex('organizador')
-                            .select('id', 'email', 'nome')
-                            .where('email', email)
-                            .first();
                         
-                        if (request.session){
-                            request.session.user = user;
-                            return response.status(200).json(id);
+                        const token = jwt.sign({ id: user.id }, `${process.env.SECRET}`, {
+                            expiresIn: '1d'
+                        })
+                        
+                        const data = {
+                            id: user.id,
+                            nome: user.nome,
+                            email: user.email,
+                            token
                         }
+
+                        return response.status(200).json(data);
                     }
                     else {
                         return response.status(404).send({message: 'Senha ou usuário incorreto'});
@@ -139,71 +133,49 @@ class OrganizadorController {
 
     
     async update(request: Request, response: Response){
-        //verifica se o usuário está autenticado na sessão
-        if(request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-            const id = request.session.user.id;
             
-            const {
-                nome,
-                telefone,
-                endereco,
-                email
-            } = request.body;
-    
-            const update = await knex('organizador')
-                .where('id', id)
-                .update({
-                    nome: nome,
-                    telefone: telefone,
-                    endereco: endereco,
-                    email: email
-                });
-            
-            if(update){
-                return response.status(200).send({ message: 'alterado com sucesso' });
-            } else {
-                return response.status(404).send({ message: 'organizador não encontrado' })
-            }
-        };
+        const {
+            nome,
+            telefone,
+            endereco,
+            email
+        } = request.body;
+
+        const id = response.locals.user;
+
+        const update = await knex('organizador')
+            .where('id', id)
+            .update({
+                nome: nome,
+                telefone: telefone,
+                endereco: endereco,
+                email: email
+            });
+        
+        if(update){
+            return response.status(200).send({ message: 'alterado com sucesso' });
+        } else {
+            return response.status(404).send({ message: 'organizador não encontrado' })
+        }
     }
         
 
 
     async delete(request: Request, response: Response){
-        if(request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
+        
+        const id = response.locals.user;
 
-            const id = request.session.user.id;
-    
-            if (await knex('organizador').where('id', id).delete()){
-                return response.status(200).send({ message: 'Conta excluída com sucesso' });
-            } else{
-                return response.status(404).send({ message: 'Cadastro não encontrado' })
-            };
-        }
+        if (await knex('organizador').where('id', id).delete()){
+            return response.status(200).send({ message: 'Conta excluída com sucesso' });
+        } else{
+            return response.status(404).send({ message: 'Cadastro não encontrado' })
+        };
     };
 
 
 
     async logout(request: Request, response: Response){
-        if(request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não logado!"});
-            }
 
-            request.session.destroy(function(err){
-                if(err){
-                    response.send(err);
-                } else{
-                    response.redirect('/');
-                }
-            });
-        }
     }
 }
 

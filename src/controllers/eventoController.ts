@@ -4,76 +4,71 @@ import { format, parseISO } from 'date-fns';
 
 class EventoController {
     async create(request: Request, response: Response){
-        if (request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-            //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const id_organizador = request.session.user.id
         
-            const { 
-                titulo,
-                descricao,
-                endereco,
-                localizacao,
-                telefone,
-                data,
-                hora,
-                id_categoria
-            } = request.body;
+        const { 
+            titulo,
+            descricao,
+            endereco,
+            localizacao,
+            telefone,
+            data,
+            hora,
+            id_categoria
+        } = request.body;
 
-            const logo = request.file.filename;
-
-
-            //querys para validação no banco de dados
-            const checkEvento = await knex('eventos')
-                .select('id')
-                .where({
-                    'titulo': titulo,
-                    'descricao': descricao
-                });        
-
-            const checkOrganizador = await knex('organizador')
-                .select('id')
-                .where('id', id_organizador);
-
-            const checkCategoria = await knex('categorias')
-                .select('id')
-                .where('id', id_categoria);
+        const id_organizador = response.locals.user;
+        const logo = request.file.filename;
 
 
+        //querys para validação no banco de dados
+        const checkEvento = await knex('eventos')
+            .select('id')
+            .where({
+                'titulo': titulo,
+                'descricao': descricao
+            });        
+
+        const checkOrganizador = await knex('organizador')
+            .select('id')
+            .where('id', id_organizador);
+
+        const checkCategoria = await knex('categorias')
+            .select('id')
+            .where('id', id_categoria);
+
+
+        
+        //condições para se criar um evento
+        if (checkEvento.length > 0) {
+            return response.status(409).send({message: 'Evento já está cadastrado'});
+
+        } else if (checkOrganizador.length == 0) {
+            return response.status(404).send({message: 'Organizador não encontrado'});
+
+        } else if (checkCategoria.length == 0) {
+            return response.status(404).send({message: 'Categoria não encontrada'});
             
-            //condições para se criar um evento
-            if (checkEvento.length > 0) {
-                return response.status(409).send({message: 'Evento já está cadastrado'});
-
-            } else if (checkOrganizador.length == 0) {
-                return response.status(404).send({message: 'Organizador não encontrado'});
-
-            } else if (checkCategoria.length == 0) {
-                return response.status(404).send({message: 'Categoria não encontrada'});
-                
-            }
-            else {
-                try {
-                    await knex('eventos').insert({
-                        titulo,
-                        descricao,
-                        endereco,
-                        localizacao,
-                        telefone,
-                        data,
-                        hora,
-                        logo,
-                        id_categoria,
-                        id_organizador
-                    });
-                    return response.status(200).send({message: 'Evento cadastrado com sucesso!'})
-                } catch (error) {
-                    return response.status(500).send({message: 'Ocorreu um erro ao cadastrar o evento, tente novamente.', erro: error})
-                }
+        }
+        else {
+            try {
+                await knex('eventos').insert({
+                    titulo,
+                    descricao,
+                    endereco,
+                    localizacao,
+                    telefone,
+                    data,
+                    hora,
+                    logo,
+                    id_categoria,
+                    id_organizador
+                });
+                return response.status(200).send({message: 'Evento cadastrado com sucesso!'})
+            } catch (error) {
+                return response.status(500).send({message: 'Ocorreu um erro ao cadastrar o evento, tente novamente.', erro: error})
             }
         }
+        
     };
 
 
@@ -135,108 +130,91 @@ class EventoController {
 
 
     async orgView(request: Request, response: Response){
-        if (request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-    
-            const id = request.session.user.id;
             
-            const eventos = await knex('eventos').join('organizador', 'eventos.id_organizador', '=', 'organizador.id')
-                .select('titulo', 'descricao', 'logo', 'eventos.id', 'data', 'nome')
-                .where('id_organizador', id)
-                .orderBy('data');
+        const id = response.locals.user;
+
+        const eventos = await knex('eventos').join('organizador', 'eventos.id_organizador', '=', 'organizador.id')
+            .select('titulo', 'descricao', 'logo', 'eventos.id', 'data', 'nome')
+            .where('id_organizador', id)
+            .orderBy('data');
+    
         
-            
-            const serializedEvento = eventos.map(eventos => {
-                return { 
-                    titulo: eventos.titulo,
-                    logo: `${process.env.URL}/${eventos.logo}`,
-                    descricao: eventos.descricao,
-                    id: eventos.id,
-                    organizador: eventos.nome
-                }
-            }); 
-    
-            if(serializedEvento.length > 0){
-                response.status(200).send(serializedEvento);
-            } 
-            else {
-                return response.status(404).send({ message: 'Ops, nada para ver aqui...'})
+        const serializedEvento = eventos.map(eventos => {
+            return { 
+                titulo: eventos.titulo,
+                logo: `${process.env.URL}/${eventos.logo}`,
+                descricao: eventos.descricao,
+                id: eventos.id,
+                organizador: eventos.nome
             }
+        }); 
+
+        if(serializedEvento.length > 0){
+            response.status(200).send(serializedEvento);
+        } 
+        else {
+            return response.status(404).send({ message: 'Ops, nada para ver aqui...'})
         }
+        
     };
 
 
 
     async update(request: Request, response: Response){
-        if (request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-            //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const org = request.session.user.id
+        
+        const { id } = request.params;
+        const {
+            titulo,
+            descricao,
+            endereco,
+            localizacao,
+            telefone,
+            data,
+            hora,
+            logo,
+            id_categoria
+        } = request.body;
 
-            const { id } = request.params;
-            const {
-                titulo,
-                descricao,
-                endereco,
-                localizacao,
-                telefone,
-                data,
-                hora,
-                logo,
-                id_categoria
-            } = request.body;
-    
-            const update = await knex('eventos')
-                .where({
-                    'id': id,
-                    'id_organizador': org
-                })
-                .update({
-                    titulo: titulo,
-                    descricao: descricao,
-                    endereco: endereco,
-                    localizacao: localizacao,
-                    telefone: telefone,
-                    data: data,
-                    hora: hora,
-                    logo: logo,
-                    id_categoria: id_categoria 
-                });
-            
-            if(update){
-                return response.status(200).send({ message: 'Alterado com sucesso!' });
-            } else {
-                return response.status(404).send({ message: 'Evento não encontrado.' })
-            }
-        };
+        const org = response.locals.user;
+
+        const update = await knex('eventos')
+            .where({
+                'id': id,
+                'id_organizador': org
+            })
+            .update({
+                titulo: titulo,
+                descricao: descricao,
+                endereco: endereco,
+                localizacao: localizacao,
+                telefone: telefone,
+                data: data,
+                hora: hora,
+                logo: logo,
+                id_categoria: id_categoria 
+            });
+        
+        if(update){
+            return response.status(200).send({ message: 'Alterado com sucesso!' });
+        } else {
+            return response.status(404).send({ message: 'Evento não encontrado.' })
+        }
+        
     }
         
-        
-
-
-
 
 
     async delete(request: Request, response: Response){
-        if (request.session){
-            if(!request.session.user){
-                return response.status(401).send({message: "Usuário não autenticado. Faça o login!"});
-            }
-            //busca pelo id do usuário logado, para que seja alterado apenas um evento pertencente a esse usuário
-            const org = request.session.user.id
-        
-            const { id } = request.params;
-    
-            if (await knex('eventos').where({'id': id,'id_organizador': org}).delete()){
-                return response.status(200).send({ message: 'Evento excluído com sucesso!'});
-            } else{
-                return response.status(404).send({ message: 'Evento não encontrado.' })
-            };
+
+        const { id } = request.params;
+        const org = response.locals.user;
+
+        if (await knex('eventos').where({'id': id,'id_organizador': org}).delete()){
+            return response.status(200).send({ message: 'Evento excluído com sucesso!'});
+        } else{
+            return response.status(404).send({ message: 'Evento não encontrado.' })
         };
+    
     }
 
 }
