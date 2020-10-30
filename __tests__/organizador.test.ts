@@ -13,7 +13,7 @@ describe('Testes funções de organizador', () =>{
             email: 'cadastro@hotmail.com',
             senha: 'senha123'
         });
-        expect(response.status).toEqual(201)
+        expect(response.status).toEqual(200)
         done();
     });
 
@@ -29,16 +29,9 @@ describe('Testes funções de organizador', () =>{
     });
 
 
-    it('deve realizar logout da api', async (done) => {
-        const response = await request(app).post('/organizador/logout')
-        .send();
-        expect(response.status).toEqual(200)
-        done();
-     });
-
-
     it('deve alterar usuário', async (done) => {
         const response = await request(app).put('/organizador')
+        .set('Authorization', `Bearer ${process.env.TOKEN}`)
         .send({
             nome: 'Teste alteração'
         });
@@ -49,6 +42,7 @@ describe('Testes funções de organizador', () =>{
 
     it('deve deletar conta de usuário', async (done) => {
         const response = await request(app).delete('/organizador')
+        .set('Authorization', `Bearer ${process.env.TOKEN}`)
         .send();
         expect(response.status).toEqual(200)
         done();

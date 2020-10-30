@@ -8,7 +8,7 @@
     "dev": "ts-node-dev src/server.ts",
     "knexmigrate": "knex --knexfile knexfile.ts migrate:latest",
     "knex:seed": "knex --knexfile knexfile.ts seed:run",
-    "test": "jest --forceExit --runInBand"
+    "test": "jest --forceExit --watchAll --maxWorkers=1"
   },
   "jest": {
     "moduleFileExtensions": [

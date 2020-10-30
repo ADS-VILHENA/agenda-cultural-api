@@ -59,7 +59,6 @@ routes.post('/organizador/login', celebrate({
     })
 }), orgController.login);
 
-routes.get('/organizador/logout', orgController.logout);
 
 
 //rota para solicitação de redefenição de senha
@@ -139,7 +138,6 @@ routes.put('/organizador', orgController.update);
 
 //rota para deletar conta de organizador
 routes.delete('/organizador', orgController.delete);
-
 
 
 export default routes;
