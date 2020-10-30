@@ -9,17 +9,11 @@ const app = express();
 
 
 cron.start();
-//variável para permitir qualquer URL ter acesso a api
-var corsOptions = {
-    origin: 'http://localhost:3000',
-    optionsSuccessStatus: 200
-}
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(routes);
 app.use('/uploads/', express.static(path.resolve(__dirname, '..', 'uploads/')));
+app.use(routes);
 app.listen(process.env.PORT || 3333);
 
 export default app;
