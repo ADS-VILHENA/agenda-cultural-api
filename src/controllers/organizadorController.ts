@@ -172,11 +172,6 @@ class OrganizadorController {
         };
     };
 
-
-
-    async logout(request: Request, response: Response){
-
-    }
 }
 
 export default OrganizadorController;

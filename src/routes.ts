@@ -80,7 +80,7 @@ routes.post('/categoria', uploads.single('imagem'), ctgController.create);
 
 
 //rota para alterar categoria
-routes.put('/categoria/:id', celebrate({
+routes.put('/categoria/:id', uploads.single('imagem'), celebrate({
     [Segments.PARAMS]: Joi.object().keys({
         id: Joi.number().required(),
     })
@@ -113,7 +113,7 @@ routes.post('/evento', uploads.single('logo'), celebrate({
 
 
 //rota para alterar um evento
-routes.put('/evento/:id', celebrate({
+routes.put('/evento/:id', uploads.single('logo'), celebrate({
     [Segments.PARAMS]: Joi.object().keys({
         id: Joi.number().required(),
     })

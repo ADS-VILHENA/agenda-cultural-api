@@ -63,9 +63,10 @@ class CategoriaController {
         const { id } = request.params;
         const {
             nome,
-            descricao,
-            imagem
+            descricao
         } = request.body;
+        const imagem = request.file.filename;
+
 
         const update = await knex('categorias')
             .where('id', id)

@@ -171,9 +171,9 @@ class EventoController {
             telefone,
             data,
             hora,
-            logo,
             id_categoria
         } = request.body;
+        const logo = request.file.filename;
 
         const org = response.locals.user;
 
