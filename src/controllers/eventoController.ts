@@ -173,7 +173,11 @@ class EventoController {
             hora,
             id_categoria
         } = request.body;
-        const logo = request.file.filename;
+        let logo;
+
+        if(typeof request.file !== 'undefined'){
+            logo = request.file.filename;
+        }
 
         const org = response.locals.user;
 
