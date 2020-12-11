@@ -104,7 +104,7 @@ class EventoController {
 
         const serializedEvento = detalhes.map(detalhes => {
             //função do pacote date-fns para conversão de string para o tipo Date
-            const date = parseISO(detalhes.data);
+            const date = detalhes.data;
             return {
                 titulo: detalhes.titulo,
                 logo: `${process.env.URL}/${detalhes.logo}`,
