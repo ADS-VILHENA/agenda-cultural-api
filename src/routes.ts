@@ -107,7 +107,7 @@ routes.post('/evento', uploads.single('logo'), celebrate({
         hora: Joi.string().required(),
         id_categoria: Joi.required()
     })
-}), evtController.create)
+}), evtController.create);
 
 
 
