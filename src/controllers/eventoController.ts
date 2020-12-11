@@ -16,10 +16,16 @@ class EventoController {
             id_categoria
         } = request.body;
 
-        const id_organizador = response.locals.user;
+        let id_organizador; 
+        if( typeof response.locals.user != 'undefined'){
+            id_organizador = response.locals.user;
+        } else{
+            return response.status(401).send({message: "Token não informado ou inválido"});
+        }
+
         const logo = request.file.filename;
 
-
+        console.log(id_organizador);
         //querys para validação no banco de dados
         const checkEvento = await knex('eventos')
             .select('id')
@@ -35,7 +41,7 @@ class EventoController {
         const checkCategoria = await knex('categorias')
             .select('id')
             .where('id', id_categoria);
-
+        
 
         
         //condições para se criar um evento
