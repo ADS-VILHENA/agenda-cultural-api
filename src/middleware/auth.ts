@@ -13,7 +13,7 @@ export const auth = async (request: Request, response: Response, next: NextFunct
     // Bearer 'token'
     const [ , token] = authHeader.split(' ');
 
-    await jwt.verify(token, `${process.env.SECRET}`, function(err: any, decodedToken: any) {
+    jwt.verify(token, `${process.env.SECRET}`, function(err: any, decodedToken: any) {
         if(err){
             return response.status(401).send({ message: 'Token inválido!', erro: err })
         } else {

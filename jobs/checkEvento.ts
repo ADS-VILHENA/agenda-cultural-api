@@ -21,9 +21,13 @@ const eventos = await knex('eventos')
 
 let i = 0;
 
+console.log('Cron Job executado');
+
 //Percorre todas datas dos eventos para alterar o status de acordo com o que deve ser
 while(eventos[i] != null){
-    const data = parseISO(eventos[i].data);
+    const data = eventos[i].data;
+
+    console.log('Percorrendo o while para o evento ' + eventos[i].id);
 
     if(isToday(data)){
         await knex('eventos')
