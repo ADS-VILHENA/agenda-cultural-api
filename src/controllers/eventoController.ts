@@ -84,7 +84,7 @@ class EventoController {
         const { id } = request.params;
         
         const eventos = await knex('eventos')
-            .select('titulo', 'descricao', 'id', 'status')
+            .select('titulo', 'descricao', 'id', 'status', 'logo')
             .where('id_categoria', id)
             .orderBy('data');
 
