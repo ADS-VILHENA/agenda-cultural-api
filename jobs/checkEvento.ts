@@ -11,12 +11,11 @@ import knex from '../src/database/connection';
 import {isToday, isPast, parseISO} from 'date-fns';
 const CronJob = require('cron').CronJob;
 
-const job = new CronJob('* * 0 * * *', async () => {
+const job = new CronJob('0 0 13,00 * * *', async () => {
 
 const eventos = await knex('eventos')
     .select('data', 'id')
     .whereNot('status', 'X')
-
 
 
 let i = 0;
