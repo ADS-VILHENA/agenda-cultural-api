@@ -92,7 +92,7 @@ class EventoController {
             return{
                 titulo: eventos.titulo,
                 descricao: eventos.descricao,
-                logo: eventos.logo,
+                logo: `${process.env.URL}/${eventos.logo}`,
                 id: eventos.id,
                 status: eventos.status
             };
