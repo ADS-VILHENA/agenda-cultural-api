@@ -88,9 +88,19 @@ class EventoController {
             .where('id_categoria', id)
             .orderBy('data');
 
-        if (eventos.length > 0) {
-            return response.status(200).send(eventos);
-        } else if(eventos.length == 0){
+        const serializedEvento = eventos.map(eventos => {
+            return{
+                titulo: eventos.titulo,
+                descricao: eventos.descricao,
+                logo: eventos.logo,
+                id: eventos.id,
+                status: eventos.status
+            };
+        });
+        
+        if (serializedEvento.length > 0) {
+            return response.status(200).send(serializedEvento);
+        } else if(serializedEvento.length == 0){
             return response.status(404).send({message: "Nenhum evento cadastrado para essa categoria!"});
         } else {
             return response.status(500).send({message: 'Ocorreu um erro ao buscar pelos eventos relacionados a essa categoria'});
